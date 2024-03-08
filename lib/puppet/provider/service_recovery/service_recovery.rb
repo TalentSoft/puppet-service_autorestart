@@ -2,12 +2,12 @@
 class Puppet::Provider::ServiceRecovery::ServiceRecovery
   def initialize
     @regex_service_name = Regexp.new(%r{SERVICE_NAME: (.*)\s*})
-    @regex_reset_period = Regexp.new(%r{\s*RESET_PERIOD \(in seconds\)    : (.*)\s*})
-    @regex_reboot_message = Regexp.new(%r{\s*REBOOT_MESSAGE               : (.*)\s*})
-    @regex_command_line = Regexp.new(%r{\s*COMMAND_LINE                 : (.*)\s*})
-    @regex_restart = Regexp.new(%r{.*RESTART -- Delay = (\d+) milliseconds.\s*})
-    @regex_run_process = Regexp.new(%r{.*RUN PROCESS -- Delay = (\d+) milliseconds.\s*})
-    @regex_reboot = Regexp.new(%r{.*REBOOT -- Delay = (\d+) milliseconds.\s*})
+    @regex_reset_period = Regexp.new(%r{\s*RESET_PERIOD \(.*\)\s*: (.*)\s*})
+    @regex_reboot_message = Regexp.new(%r{\s*REBOOT_MESSAGE\s*: (.*)\s*})
+    @regex_command_line = Regexp.new(%r{\s*COMMAND_LINE\s*: (.*)\s*})
+    @regex_restart = Regexp.new(%r{.*RESTART -- .* = (\d+) .*\s*})
+    @regex_run_process = Regexp.new(%r{.*RUN PROCESS -- .* = (\d+) .*\s*})
+    @regex_reboot = Regexp.new(%r{.*REBOOT -- .* = (\d+) .*\s*})
     # maps failure_action 'action's to the 'action' names in the sc.exe command
     @failure_action_sc_map = {
       'noop' => '',
@@ -163,7 +163,7 @@ class Puppet::Provider::ServiceRecovery::ServiceRecovery
   end
 
   def attribute_changed(context, name, prop, is, should)
-    changed = should[:reset_period] && (is[:reset_period] != should[:reset_period])
+    changed = should[prop] && (is[prop] != should[prop])
     context.attribute_changed(name, prop.to_s, is[prop], should[prop]) if changed
     changed
   end
